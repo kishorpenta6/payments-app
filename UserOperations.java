@@ -1,54 +1,43 @@
-//package com.sat.tmf.paymentscli;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import com.sat.tmf.paymentscli.entity.BankAccount;
-//import com.sat.tmf.paymentscli.entity.User;
-
 public class UserOperations {
 	
-	List<User> users = null;
-	List<BankAccount> bankAcctList = null;
+	public List<User> users=null;
+	public List<BankAccount> baAcctList=null;
 	
 	public UserOperations() {
-		users= RunPaymentsApp.usersList;
-		bankAcctList = RunPaymentsApp.bankAcctList;
+		users = RunPaymentsApp.userList;
+		baAcctList = RunPaymentsApp.baAcctList;
 	}
-	
-	public User doUserRegistration(String fName, String lName, String password, long phNum, String dob,String addr) throws Exception {
+	public User doUserRegistration(String fname,String lname,long phnum,String dob,String addr,String pswd) {
 		User u = new User();
-		u.setFirstName(fName);
-		u.setLastName(lName);
-		u.setPhoneNum(phNum);
+		u.setFirstName(fname);
+		u.setLastName(lname);
+		u.setPhoneNumber(phnum);
 		u.setDateOfBirth(dob);
-		u.setCommunicationAddr(addr);
-		u.setPassword(password);
+		u.setAddress(addr);
+		u.setPassword(pswd);
 		
-		if((fName+lName).length() >50) {
-			throw new Exception();
-		}
+		u.setUserId((int)(Math.random()*1000)+100); 
 		
-		u.setUserId((int)(Math.random()*1000)+100);
-		PaymentsFileOps pfOps = new PaymentsFileOps();
-		pfOps.writeUserToFile(u);
 		return u;
 	}
 	
-	public void printUserList(List<User> users){
+	public void printUsersList(List<User> users) {
 		for(User u:users) {
-			if(users != null) {
-				System.out.println("User Details of "+ u.getFirstName());
+			if(users!=null) {
+				System.out.println("User Details of : "+u.getFirstName());
 				System.out.println(u);
 			}
 		}
 	}
 	
-	public boolean verifyUserLogin(String userId, String password){
+	public boolean verifyUserLogin(String uId,String pswd) {
 		for(int i=0;i<users.size();i++) {
-			if(String.valueOf(users.get(i).getUserId()).equals(userId)) {
-				if(password.equals(users.get(i).getPassword())) {
+			if(String.valueOf(users.get(i).getUserId()).equals(uId)) {
+				if(pswd.equals(users.get(i).getPassword())) {
 					return true;
 				}
 			}
@@ -56,34 +45,39 @@ public class UserOperations {
 		return false;
 	}
 	
-	public void printCurrUserDetails(int userId){
+	public void printCurrUserDetails(int UserId) {
 		for(User u:users) {
-			if(u.getUserId() == userId) {
+			if(u.getUserId()==UserId) {
 				System.out.println(u);
-			}else {
-				System.out.println("No User Logged in.");
+			}
+			else {
+				System.out.println("No user logged in");
 			}
 		}
-//		for(int i=0;i<users.size();i++) {
-//			if(users.get(i).getUserId() != userId) {
-//				System.out.println(users.get(i));
-//				break;
-//			}
-//		}
 	}
 	
-	public Map<User,List<BankAccount>> getUserBankAccounts() {
+	public Map<User,List<BankAccount>> getUsersBankAccount(){
 		
-//		Map<User,BankAccount> userBankAcctMap = new HashMap<User,BankAccount>();
 		Map<User,List<BankAccount>> userBankAcctMap = new HashMap<User,List<BankAccount>>();
 		
-		for(User u:users) {
-			if(users != null) {
-				userBankAcctMap.put(u, u.getBaList());
+		for(User u :users) {
+			if(users!=null) {
+				userBankAcctMap.put(u,u.getBaList());
 			}
 		}
 		return userBankAcctMap;
-		
+	}
+	
+	public boolean verifyUserBankAccount(String bankAcctNumber,String pin) {
+		for(int i=0;i<baAcctList.size();i++) {
+			if(String.valueOf(baAcctList.get(i).getBankAcctNumber()).equals(bankAcctNumber)) {
+				if(pin.equals(baAcctList.get(i).getBankAcctPin())) {
+					baAcctList.remove(i);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }
