@@ -1,4 +1,6 @@
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,7 @@ public class RunPaymentsApp {
 	public static List<User> userList = new ArrayList<User>();
 	public static int currUserId = -1;
 	public static List<BankAccount> baAcctList = new ArrayList<BankAccount>();
+	public static Map<Integer, Wallet> walletList = new HashMap<Integer, Wallet>();
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -50,7 +53,11 @@ public class RunPaymentsApp {
 				Registration();
 			} else if (op.equalsIgnoreCase("2")) {
 				System.out.println("Login");
-				Login();
+				try {
+					login();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			} else if (op.equalsIgnoreCase("3")) {
 				if (validateCurrUser()) {
 					System.out.println("Please Enter bank account details: ");
@@ -63,10 +70,17 @@ public class RunPaymentsApp {
 				}
 			} else if (op.equalsIgnoreCase("5")) {
 				System.out.println("List of users");
-				uop.printUsersList(userList);
+				// uop.printUsersList(userList);
+				try {
+					PaymentAppCliDAO dao = new PaymentAppCliDAO();
+					dao.printUserDetails();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			} else if (op.equalsIgnoreCase("6")) {
 				if (currUserId != -1) {
 					System.out.println("Current users");
+					
 					uop.printCurrUserDetails(currUserId);
 				}
 			} else if (op.equalsIgnoreCase("7")) {
@@ -110,27 +124,34 @@ public class RunPaymentsApp {
 		String pswd = sc.next();
 
 		User u;
+		u = uop.doUserRegistration(fname, lname, phnum, dob, addr, pswd);
+		// userList.add(u);
+		PaymentAppCliDAO dao = new PaymentAppCliDAO();
 		try {
-			u = uop.doUserRegistration(fname, lname, phnum, dob, addr, pswd);
-			// userList.add(u);
-			PaymentAppCliDAO dao = new PaymentAppCliDAO();
 			dao.storeUserDetails(u);
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		Wallet wallet = new Wallet();
+		int userId = u.getUserId();
+		walletList.put(userId, wallet);
+
 	}
 
-	public static boolean Login() {
+	public static boolean login() throws SQLException {
 		Scanner sc = new Scanner(System.in);
-		UserOperations uop = new UserOperations();
+		// UserOperations uop = new UserOperations();
 
 		System.out.println("Enter Your User ID: ");
-		String uId = sc.next();
+		int uId = sc.nextInt();
 		System.out.println("Enter Your Password: ");
 		String pswd = sc.next();
+		PaymentAppCliDAO dao = new PaymentAppCliDAO();
 
-		if (uop.verifyUserLogin(uId, pswd)) {
-			currUserId = Integer.parseInt(uId);
+		if (PaymentAppCliDAO.verifyUserLogin(uId, pswd)) {
+			currUserId = uId;
+			dao.verifyUserLogin(uId, pswd);
 			return true;
 		} else {
 			System.out.println("Login Failed, please try again!!");
@@ -198,7 +219,13 @@ public class RunPaymentsApp {
 				u.getBaList().add(ba);
 			}
 		}
-		baAcctList.add(ba);
+		// baAcctList.add(ba);
+		PaymentAppCliDAO dao = new PaymentAppCliDAO();
+		try {
+			dao.storeUserBankAcctDetails(ba);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void printUserBankAccounts() {
@@ -236,67 +263,65 @@ public class RunPaymentsApp {
 	}
 
 	public static void WalletOperation() {
-
-		Scanner sc = new Scanner(System.in);
-		UserOperations uop = new UserOperations();
-		int Balance = 0;
-		int Deposit = 0;
-		int Withdraw = 0;
-		// int password=1234;
-		int pin = 0;
-
 		while (true) {
-			System.out.println("Please choose an option: ");
+			System.out.println("1. Add money to Wallet");
+			System.out.println("2. Check wallet balance");
+			System.out.println("3. Back");
 
-			System.out.println("1.Check Balance ");
-			System.out.println("2.Deposit");
-			System.out.println("3.Withdraw");
-			System.out.println("4.Transaction History");
-			System.out.println("5.EXIT \n");
-
-			System.out.println("Enter your option :");
-
+			Scanner sc = new Scanner(System.in);
+			System.out.println("Enter an Option: ");
 			int opt = sc.nextInt();
 
 			switch (opt) {
 			case 1:
-				System.out.println("Your current Balance is : " + Balance + "\n");
+				System.out.println("Add money to Wallet");
+				if (currUserId != -1) {
+					Wallet wa = new Wallet();
+					// System.out.println("Wallet Balance: " + wa.getBalance());
+
+					Scanner scan = new Scanner(System.in);
+					System.out.println("Enter an amount: ");
+					double amount = scan.nextDouble();
+					wa.setBalance(wa.getBalance() + amount);
+					if (amount <= wa.getWalletAmountLimit()) {
+						UserOperations uop = new UserOperations();
+						uop.addMoneyToWallet(amount);
+					} else {
+						System.out.println("Out of the Wallet Limit!!");
+					}
+					// System.out.println("Current Wallet Balance: " + wa.getBalance());
+					System.out.println();
+				} else {
+					System.out.println("Please check whether user is login or not!!");
+				}
+
 				break;
 
 			case 2:
-				System.out.println("Enter an amount to Deposit: ");
-				Deposit = sc.nextInt();
-				Balance = Deposit + Balance;
-				System.out.println("Your current Balance is : " + Balance);
-				break;
-
-			case 3:
-				System.out.println("Enter an amount to Withdraw: ");
-				Withdraw = sc.nextInt();
-				if (Balance > Withdraw) {
-					Balance = Balance - Withdraw;
-					System.out.println("Your current Balance is : " + Balance);
-				} else {
-					System.out.println("Your current balance is Unable to Withdraw!");
+				if (currUserId != -1) {
+					UserOperations uop = new UserOperations();
+					try {
+						System.out.println("Current Wallet Balance: " + uop.checkWalletBalance());
+					} catch (NullPointerException ne) {
+						ne.printStackTrace();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				break;
 
-			case 4:
-				System.out.println("Your last transactioin history : ");
-				System.out.println("Last time added desposited amount : " + Deposit);
-				System.out.println("Last time taken withdrawal amount : " + Withdraw);
-				System.out.println("Your current available Balance is : " + Balance + "\n");
-				break;
-			case 5:
+			case 3:
 				System.out.println("Thanks You!! \n");
 				break;
 
 			default:
 				System.out.println("Enter valid Option!!");
 			}
-			if (opt == 5) {
+			if (opt == 3) {
 				break;
 			}
 		}
+
 	}
 }
+	
