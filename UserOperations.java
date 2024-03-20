@@ -6,10 +6,12 @@ public class UserOperations {
 	
 	public List<User> users=null;
 	public List<BankAccount> baAcctList=null;
+	public Map<Integer,Wallet> walletList=null;
 	
 	public UserOperations() {
 		users = RunPaymentsApp.userList;
 		baAcctList = RunPaymentsApp.baAcctList;
+		walletList=RunPaymentsApp.walletList;
 	}
 	public User doUserRegistration(String fname,String lname,long phnum,String dob,String addr,String pswd) {
 		User u = new User();
@@ -25,26 +27,26 @@ public class UserOperations {
 		return u;
 	}
 	
-	public void printUsersList(List<User> users) {
-		for(User u:users) {
-			if(users!=null) {
-				System.out.println("User Details of : "+u.getFirstName());
-				System.out.println(u);
-			}
-		}
-	}
+//	public void printUsersList(List<User> users) {
+//		for(User u:users) {
+//			if(users!=null) {
+//				System.out.println("User Details of : "+u.getFirstName());
+//				System.out.println(u);
+//			}
+//		}
+//	}
 	
-	public boolean verifyUserLogin(String uId,String pswd) {
-		for(int i=0;i<users.size();i++) {
-			if(String.valueOf(users.get(i).getUserId()).equals(uId)) {
-				if(pswd.equals(users.get(i).getPassword())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
+//	public boolean verifyUserLogin(String uId,String pswd) {
+//		for(int i=0;i<users.size();i++) {
+//			if(String.valueOf(users.get(i).getUserId()).equals(uId)) {
+//				if(pswd.equals(users.get(i).getPassword())) {
+//					return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
+//	
 	public void printCurrUserDetails(int UserId) {
 		for(User u:users) {
 			if(u.getUserId()==UserId) {
@@ -78,6 +80,17 @@ public class UserOperations {
 			}
 		}
 		return false;
+	}
+	
+	public void addMoneyToWallet(double amount) {
+		if(walletList.containsKey(RunPaymentsApp.currUserId)) {
+			walletList.get(RunPaymentsApp.currUserId).setBalance(walletList.get(RunPaymentsApp.currUserId ).getBalance()+amount);
+	        System.out.println("Current wallet Balance: "+walletList.get(RunPaymentsApp.currUserId ).getBalance());
+		}
+	}
+	
+	public double checkWalletBalance() {
+		return walletList.get(RunPaymentsApp.currUserId ).getBalance();
 	}
 
 }
