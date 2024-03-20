@@ -80,7 +80,7 @@ public class RunPaymentsApp {
 			} else if (op.equalsIgnoreCase("6")) {
 				if (currUserId != -1) {
 					System.out.println("Current users");
-					
+
 					uop.printCurrUserDetails(currUserId);
 				}
 			} else if (op.equalsIgnoreCase("7")) {
@@ -153,11 +153,8 @@ public class RunPaymentsApp {
 			currUserId = uId;
 			dao.verifyUserLogin(uId, pswd);
 			return true;
-		} else {
-			System.out.println("Login Failed, please try again!!");
-			return false;
 		}
-
+		return false;
 	}
 
 	public static boolean validateCurrUser() {
@@ -186,22 +183,22 @@ public class RunPaymentsApp {
 		System.out.println("SL: SALARY");
 		String baAcctType = sc.next();
 
-		if (baAcctType.equalsIgnoreCase("SA")) {
-			// System.out.println(AcctType.SAVINGS);
-			selectedAcctType = AcctType.SAVINGS;
-
-		} else if (baAcctType.equalsIgnoreCase("CA")) {
-			// System.out.println(AcctType.CURRENT);
-			selectedAcctType = AcctType.CURRENT;
-		} else if (baAcctType.equalsIgnoreCase("LA")) {
-			// System.out.println(AcctType.LOAN);
-			selectedAcctType = AcctType.LOAN;
-		} else if (baAcctType.equalsIgnoreCase("SL")) {
-			// System.out.println(AcctType.SALARY);
-			selectedAcctType = AcctType.SALARY;
-		} else {
-			System.out.println("Enter Valid Account Type Option");
-		}
+//		if (baAcctType.equalsIgnoreCase("SA")) {
+//			// System.out.println(AcctType.SAVINGS);
+//			selectedAcctType = AcctType.SAVINGS;
+//
+//		} else if (baAcctType.equalsIgnoreCase("CA")) {
+//			// System.out.println(AcctType.CURRENT);
+//			selectedAcctType = AcctType.CURRENT;
+//		} else if (baAcctType.equalsIgnoreCase("LA")) {
+//			// System.out.println(AcctType.LOAN);
+//			selectedAcctType = AcctType.LOAN;
+//		} else if (baAcctType.equalsIgnoreCase("SL")) {
+//			// System.out.println(AcctType.SALARY);
+//			selectedAcctType = AcctType.SALARY;
+//		} else {
+//			System.out.println("Enter Valid Account Type Option");
+//		}
 
 		System.out.println("Bank Account Pin: ");
 		String baAcctPin = sc.next();
@@ -210,15 +207,15 @@ public class RunPaymentsApp {
 		ba.setBankAcctNumber(baAcctNum);
 		ba.setBankAcctIFSC(baIFSCCode);
 		ba.setBankAcctBankName(baName);
-		ba.setBankAcctType(selectedAcctType);
+		ba.setBankAcctType(baAcctType);
 		ba.setBankAcctPin(baAcctPin);
 		ba.setUserId(currUserId);
 
-		for (User u : userList) {
-			if (u.getUserId() == currUserId) {
-				u.getBaList().add(ba);
-			}
-		}
+//		for (User u : userList) {
+//			if (u.getUserId() == currUserId) {
+//				u.getBaList().add(ba);
+//			}
+//		}
 		// baAcctList.add(ba);
 		PaymentAppCliDAO dao = new PaymentAppCliDAO();
 		try {
